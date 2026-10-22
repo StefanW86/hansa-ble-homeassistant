@@ -1,0 +1,53 @@
+# ESPHome Bluetooth proxy for the HANSA Connect BLE integration.
+# Board: ESP32-S3-DevKitC-1. No custom code: the HANSA protocol runs in Home Assistant.
+#
+# Place it in the bathroom or right behind the wall - the fittings transmit weakly.
+
+substitutions:
+  name: hansa-bt-proxy
+  friendly_name: HANSA Bluetooth Proxy
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+
+esp32:
+  board: esp32-s3-devkitc-1
+  framework:
+    type: esp-idf
+
+logger:
+
+api:
+  encryption:
+    key: !secret hansa_proxy_api_key
+
+ota:
+  - platform: esphome
+    password: !secret hansa_proxy_ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: ${name}
+
+captive_portal:
+
+# Default scan parameters are recommended; active scanning (default) also delivers
+# the scan response that carries the fittings' names ("ORAS…"/"CYPRESS…").
+esp32_ble_tracker:
+
+bluetooth_proxy:
+  active: true
+  # 3 slots (default): both fittings can run "flush" at the same time.
+  connection_slots: 3
+
+sensor:
+  - platform: wifi_signal
+    name: WLAN-Signal
+    update_interval: 60s
+
+button:
+  - platform: restart
+    name: Neustart

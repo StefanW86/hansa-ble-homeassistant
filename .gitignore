@@ -1,0 +1,12 @@
+# Nie veröffentlichen: App, dekompilierter Code, Werkzeuge, extrahierte App-Ressourcen
+apk/
+decompiled/
+tools/
+analysis/
+verify_crypto.js
+
+__pycache__/
+*.pyc
+.pytest_cache/
+esphome/secrets.yaml
+esphome/.esphome/

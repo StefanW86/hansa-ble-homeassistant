@@ -1,0 +1,162 @@
+{
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "user": {
+        "title": "Armatur auswählen",
+        "data": {
+          "address": "Armatur"
+        }
+      },
+      "confirm": {
+        "title": "HANSA-Armatur gefunden",
+        "description": "Bluetooth-Name: {name}\nMAC: {address}\nStandort: {location}\n\nLass die Armatur blinken, um zu sehen, welche es ist. Letztes Ergebnis: {wink_result}",
+        "menu_options": {
+          "identify": "Armatur blinken lassen (identifizieren)",
+          "details": "Weiter"
+        }
+      },
+      "details": {
+        "title": "Name und Passwort",
+        "data": {
+          "name": "Name",
+          "password": "Gerätepasswort"
+        },
+        "data_description": {
+          "name": "z. B. Waschtisch links",
+          "password": "Werkseinstellung ist Electra (wie in der HANSA360-App)"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Passwort von der Armatur abgelehnt",
+      "cannot_connect": "Keine Verbindung. Ist der ESPHome-Bluetooth-Proxy in Reichweite?"
+    },
+    "abort": {
+      "already_configured": "Bereits eingerichtet",
+      "no_devices_found": "Keine HANSA-Armatur per Bluetooth gefunden",
+      "not_supported": "Keine HANSA-Armatur"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Gerätepasswort",
+        "data": {
+          "password": "Gerätepasswort"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "valve": {
+        "name": "Ventil"
+      },
+      "sensor_error": {
+        "name": "Sensorfehler"
+      }
+    },
+    "button": {
+      "flush": {
+        "name": "Vorlaufen"
+      },
+      "identify": {
+        "name": "Identifizieren"
+      }
+    },
+    "number": {
+      "flush_duration": {
+        "name": "Vorlaufdauer"
+      },
+      "cleaning_duration": {
+        "name": "Reinigungsdauer"
+      }
+    },
+    "switch": {
+      "cleaning_lock": {
+        "name": "Reinigungssperre"
+      }
+    },
+    "sensor": {
+      "water_total": {
+        "name": "Wasser gesamt"
+      },
+      "water_trip": {
+        "name": "Wasser seit Reset"
+      },
+      "open_count_total": {
+        "name": "Öffnungen gesamt"
+      },
+      "open_count_trip": {
+        "name": "Öffnungen seit Reset"
+      },
+      "use_count_total": {
+        "name": "Nutzungen gesamt"
+      },
+      "use_count_trip": {
+        "name": "Nutzungen seit Reset"
+      },
+      "auto_flush_count": {
+        "name": "Hygienespülungen"
+      },
+      "open_time_total": {
+        "name": "Öffnungszeit gesamt"
+      },
+      "open_time_trip": {
+        "name": "Öffnungszeit seit Reset"
+      },
+      "since_last_use": {
+        "name": "Zeit seit letzter Nutzung"
+      },
+      "flow_rate": {
+        "name": "Eingestellte Durchflussrate"
+      },
+      "since_counter_reset": {
+        "name": "Zeit seit Zählerreset"
+      },
+      "type_code": {
+        "name": "Gerätetyp-Code"
+      },
+      "bluetooth_mode": {
+        "name": "Bluetooth-Modus",
+        "state": {
+          "always_on": "Immer an",
+          "after_usage": "Aktiv nach Benutzung",
+          "after_boot": "Aktiv nach Einschalten",
+          "ir_off": "IR-Erkennung aus"
+        }
+      },
+      "app_control": {
+        "name": "App-Steuerung",
+        "state": {
+          "all_allowed": "Alles erlaubt",
+          "open_disabled": "Öffnen gesperrt",
+          "all_disabled": "Alles gesperrt"
+        }
+      }
+    }
+  },
+  "services": {
+    "flush": {
+      "name": "Vorlaufen",
+      "description": "Öffnet die Armatur(en), wartet und schaltet zurück in den Normalbetrieb. Mehrere Armaturen laufen parallel.",
+      "fields": {
+        "device_id": {
+          "name": "Armaturen",
+          "description": "HANSA-Armaturen, die vorlaufen sollen"
+        },
+        "duration": {
+          "name": "Dauer",
+          "description": "Sekunden; Standard ist die Vorlaufdauer der Armatur"
+        }
+      }
+    }
+  },
+  "issues": {
+    "remote_control_restricted": {
+      "title": "{name}: Fernsteuerung eingeschränkt",
+      "description": "Der Bluetooth-Modus der Armatur ist nicht „Immer an“ oder die App-Steuerung nicht „Alles erlaubt“. Automationen können dann fehlschlagen. Beides in der HANSA360-App (Geräteeinstellungen) ändern."
+    }
+  }
+}

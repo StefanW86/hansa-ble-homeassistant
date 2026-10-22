@@ -1,0 +1,16 @@
+flush:
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          integration: hansa_ble
+          multiple: true
+    duration:
+      required: false
+      selector:
+        number:
+          min: 1
+          max: 600
+          unit_of_measurement: s
+          mode: box

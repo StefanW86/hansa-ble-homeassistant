@@ -1,0 +1,162 @@
+{
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "user": {
+        "title": "Select fitting",
+        "data": {
+          "address": "Fitting"
+        }
+      },
+      "confirm": {
+        "title": "HANSA fitting found",
+        "description": "Bluetooth name: {name}\nMAC: {address}\nLocation: {location}\n\nLet the fitting blink to see which one this is. Last result: {wink_result}",
+        "menu_options": {
+          "identify": "Let fitting blink (identify)",
+          "details": "Continue"
+        }
+      },
+      "details": {
+        "title": "Name and password",
+        "data": {
+          "name": "Name",
+          "password": "Device password"
+        },
+        "data_description": {
+          "name": "e.g. Basin left",
+          "password": "Factory default is Electra (same as in the HANSA360 app)"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Password rejected by the fitting",
+      "cannot_connect": "Could not connect. Is the ESPHome Bluetooth proxy in range?"
+    },
+    "abort": {
+      "already_configured": "Already configured",
+      "no_devices_found": "No HANSA fitting found via Bluetooth",
+      "not_supported": "Not a HANSA fitting"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Device password",
+        "data": {
+          "password": "Device password"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "valve": {
+        "name": "Valve"
+      },
+      "sensor_error": {
+        "name": "Sensor error"
+      }
+    },
+    "button": {
+      "flush": {
+        "name": "Warm-up flush"
+      },
+      "identify": {
+        "name": "Identify"
+      }
+    },
+    "number": {
+      "flush_duration": {
+        "name": "Flush duration"
+      },
+      "cleaning_duration": {
+        "name": "Cleaning lock duration"
+      }
+    },
+    "switch": {
+      "cleaning_lock": {
+        "name": "Cleaning lock"
+      }
+    },
+    "sensor": {
+      "water_total": {
+        "name": "Water total"
+      },
+      "water_trip": {
+        "name": "Water since reset"
+      },
+      "open_count_total": {
+        "name": "Openings total"
+      },
+      "open_count_trip": {
+        "name": "Openings since reset"
+      },
+      "use_count_total": {
+        "name": "Uses total"
+      },
+      "use_count_trip": {
+        "name": "Uses since reset"
+      },
+      "auto_flush_count": {
+        "name": "Hygiene flushes"
+      },
+      "open_time_total": {
+        "name": "Open time total"
+      },
+      "open_time_trip": {
+        "name": "Open time since reset"
+      },
+      "since_last_use": {
+        "name": "Time since last use"
+      },
+      "flow_rate": {
+        "name": "Configured flow rate"
+      },
+      "since_counter_reset": {
+        "name": "Time since counter reset"
+      },
+      "type_code": {
+        "name": "Device type code"
+      },
+      "bluetooth_mode": {
+        "name": "Bluetooth mode",
+        "state": {
+          "always_on": "Always on",
+          "after_usage": "Active after usage",
+          "after_boot": "Active after boot",
+          "ir_off": "IR detection off"
+        }
+      },
+      "app_control": {
+        "name": "App control",
+        "state": {
+          "all_allowed": "All allowed",
+          "open_disabled": "Opening disabled",
+          "all_disabled": "All disabled"
+        }
+      }
+    }
+  },
+  "services": {
+    "flush": {
+      "name": "Warm-up flush",
+      "description": "Opens the fitting(s), waits and returns them to normal operation. Several fittings run in parallel.",
+      "fields": {
+        "device_id": {
+          "name": "Fittings",
+          "description": "HANSA fittings to flush"
+        },
+        "duration": {
+          "name": "Duration",
+          "description": "Seconds; default is the fitting's flush duration entity"
+        }
+      }
+    }
+  },
+  "issues": {
+    "remote_control_restricted": {
+      "title": "{name}: remote control restricted",
+      "description": "The fitting's Bluetooth mode is not 'Always on' or app control is not 'All allowed'. Morning automations may fail. Change both in the HANSA360 app (device settings)."
+    }
+  }
+}
