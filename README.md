@@ -77,30 +77,15 @@ Falls 1. oder 2. später nicht stimmen, meldet Home Assistant das unter **Einste
 
 ## 4. Integration über HACS installieren
 
-### 4.1 Eigenes GitHub-Repo anlegen (einmalig)
+### 4.1 Repository
 
-HACS kann nur öffentliche GitHub-Repos einbinden. Das Repo enthält ausschließlich eigenen Code und Doku: keine App, keinen dekompilierten Code. Das stellt die `.gitignore` sicher.
-
-1. Lege auf <https://github.com/new> ein **öffentliches** Repo `hansa-ble-homeassistant` an, **ohne** README.
-2. Ersetze den Platzhalter `<DEIN-GITHUB-NAME>` durch deinen GitHub-Namen, und zwar in `custom_components/hansa_ble/manifest.json` und hier in der README. In PowerShell geht das so:
-   ```powershell
-   $u = "deinname"; foreach ($f in "custom_components/hansa_ble/manifest.json","README.md") { (Get-Content $f -Raw).Replace("<DEIN-GITHUB-NAME>", $u) | Set-Content $f -NoNewline -Encoding utf8 }
-   ```
-3. Hochladen:
-   ```bash
-   git add -A && git commit -m "GitHub-Namen eingetragen"
-   ```
-   ```bash
-   git remote add origin https://github.com/<DEIN-GITHUB-NAME>/hansa-ble-homeassistant.git
-   ```
-   ```bash
-   git push -u origin main
-   ```
+Die Integration liegt öffentlich unter <https://github.com/StefanW86/hansa-ble-homeassistant>, weil HACS nur öffentliche Repos einbinden kann.
+Das Repo enthält ausschließlich eigenen Code und Doku: keine App, keinen dekompilierten Code. Das stellt die `.gitignore` sicher.
 
 ### 4.2 In HACS hinzufügen
 
 1. **HACS** → oben rechts **⋮** → **Benutzerdefinierte Repositories**.
-2. Repository: `https://github.com/<DEIN-GITHUB-NAME>/hansa-ble-homeassistant`, Typ **Integration** → **Hinzufügen**.
+2. Repository: `https://github.com/StefanW86/hansa-ble-homeassistant`, Typ **Integration** → **Hinzufügen**.
 3. In HACS nach **HANSA Connect BLE** suchen → **Herunterladen**.
 4. **Home Assistant neu starten** (*Einstellungen → System → oben rechts ⏻ → Home Assistant neu starten*).
 
