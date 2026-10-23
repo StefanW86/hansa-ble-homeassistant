@@ -125,7 +125,7 @@ Jede Armatur ist ein eigenes Gerät mit diesen Entities:
 | Öffnungen, Nutzungen, Hygienespülungen | Sensor | Zähler gesamt bzw. seit Reset |
 | Öffnungszeit gesamt / seit Reset | Sensor (s) | |
 | Zeit seit letzter Nutzung | Sensor | |
-| Diagnose | Sensoren | Bluetooth-Modus, App-Steuerung, Gerätetyp-Code, Sensorfehler, Zeit seit Zählerreset |
+| Diagnose | Sensoren | Signalstärke (RSSI, aktualisiert mit jeder Abfrage, auch wenn die Armatur nicht erreichbar ist), Bluetooth-Modus, App-Steuerung, Gerätetyp-Code, Sensorfehler, Zeit seit Zählerreset |
 
 Die Werte werden alle **15 Minuten** abgefragt und zusätzlich direkt nach jeder Aktion.
 

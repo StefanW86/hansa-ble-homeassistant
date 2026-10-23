@@ -140,6 +140,9 @@
           "open_disabled": "Opening disabled",
           "all_disabled": "All disabled"
         }
+      },
+      "rssi": {
+        "name": "Signal strength"
       }
     }
   },

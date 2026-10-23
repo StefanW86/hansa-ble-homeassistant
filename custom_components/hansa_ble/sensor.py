@@ -11,7 +11,8 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
-from homeassistant.const import EntityCategory, UnitOfTime, UnitOfVolume
+from homeassistant.components import bluetooth
+from homeassistant.const import SIGNAL_STRENGTH_DECIBELS_MILLIWATT, EntityCategory, UnitOfTime, UnitOfVolume
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
@@ -86,7 +87,7 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: HansaConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback
 ) -> None:
     c = entry.runtime_data
-    async_add_entities(HansaSensor(c, d) for d in SENSORS)
+    async_add_entities([*(HansaSensor(c, d) for d in SENSORS), RssiSensor(c, "rssi")])
 
 
 class HansaSensor(HansaEntity, SensorEntity):
@@ -99,3 +100,24 @@ class HansaSensor(HansaEntity, SensorEntity):
     @property
     def native_value(self) -> float | int | str | None:
         return self.entity_description.value_fn(self.coordinator.data, self.coordinator)
+
+
+class RssiSensor(HansaEntity, SensorEntity):
+    """Signal strength of the last advertisement HA received (via the best adapter/proxy).
+    Refreshed with every poll, also failed ones - so it stays useful when the fitting is unreachable."""
+
+    _attr_device_class = SensorDeviceClass.SIGNAL_STRENGTH
+    _attr_native_unit_of_measurement = SIGNAL_STRENGTH_DECIBELS_MILLIWATT
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def _info(self):
+        return bluetooth.async_last_service_info(self.hass, self.coordinator.address, connectable=False)
+
+    @property
+    def available(self) -> bool:
+        return self._info() is not None
+
+    @property
+    def native_value(self) -> int | None:
+        return info.rssi if (info := self._info()) else None

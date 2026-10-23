@@ -140,6 +140,9 @@
           "open_disabled": "Öffnen gesperrt",
           "all_disabled": "Alles gesperrt"
         }
+      },
+      "rssi": {
+        "name": "Signalstärke"
       }
     }
   },

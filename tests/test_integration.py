@@ -62,6 +62,7 @@ async def test_entities_and_values(hass: HomeAssistant, fitting) -> None:
     assert hass.states.get("number.waschtisch_links_cleaning_lock_duration").state == "600"
     assert hass.states.get("number.waschtisch_links_flush_duration").state == "30"
     assert hass.states.get("sensor.waschtisch_links_bluetooth_mode").state == "always_on"
+    assert hass.states.get("sensor.waschtisch_links_signal_strength").state == "-60"
     # basin v2 (>=10) gets the 4-byte clock
     assert len(fitting.time_writes[-1]) == 4
     device = dr.async_get(hass).async_get_device_by_identifier((DOMAIN, ADDRESS), entry.entry_id)
