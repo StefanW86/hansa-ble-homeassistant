@@ -63,6 +63,9 @@
       },
       "identify": {
         "name": "Identify"
+      },
+      "reset_counters": {
+        "name": "Reset counters"
       }
     },
     "number": {
@@ -71,6 +74,12 @@
       },
       "cleaning_duration": {
         "name": "Cleaning lock duration"
+      },
+      "max_open_time": {
+        "name": "Max. open time"
+      },
+      "flow_rate": {
+        "name": "Flow rate"
       }
     },
     "switch": {
@@ -108,9 +117,6 @@
       },
       "since_last_use": {
         "name": "Time since last use"
-      },
-      "flow_rate": {
-        "name": "Configured flow rate"
       },
       "since_counter_reset": {
         "name": "Time since counter reset"

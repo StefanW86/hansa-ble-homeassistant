@@ -117,12 +117,15 @@ Jede Armatur ist ein eigenes Gerät mit diesen Entities:
 | **Reinigungssperre** | Schalter | An: Sensor gesperrt (das Gerät beendet die Sperre selbst nach *Reinigungsdauer*). Aus: sofort wieder normal |
 | Vorlaufdauer | Zahl (Konfiguration) | Standard 30 s; höchstens so lang wie die „Manual flush time“ (`maxOpenTime`) der Armatur |
 | Reinigungsdauer | Zahl (Konfiguration) | Wird direkt in der Armatur gespeichert (`maxCloseTime`), braucht das Passwort |
+| Max. Öffnungszeit | Zahl (Konfiguration) | „Manual flush time“ (`maxOpenTime`): so lange läuft das Wasser bei einmal Öffnen höchstens. In der Armatur gespeichert, mindestens 30 s |
+| Durchflussrate | Zahl (Konfiguration, l/min) | In der Armatur gespeichert (`flowRate`). Daraus berechnet sie die Liter, also einmal mit dem Messbecher nachmessen |
+| Zähler zurücksetzen | Button (Konfiguration) | Setzt die Zähler „seit Reset“ auf 0. Die Gesamtzähler bleiben |
 | Ventil | Binärsensor | offen / zu |
 | Wasser gesamt / seit Reset | Sensor (L) | Von der Armatur berechnet, aus Öffnungszeit × eingestellter Durchflussrate |
 | Öffnungen, Nutzungen, Hygienespülungen | Sensor | Zähler gesamt bzw. seit Reset |
 | Öffnungszeit gesamt / seit Reset | Sensor (s) | |
 | Zeit seit letzter Nutzung | Sensor | |
-| Diagnose | Sensoren | Durchflussrate, Bluetooth-Modus, App-Steuerung, Gerätetyp-Code, Sensorfehler, Zeit seit Zählerreset |
+| Diagnose | Sensoren | Bluetooth-Modus, App-Steuerung, Gerätetyp-Code, Sensorfehler, Zeit seit Zählerreset |
 
 Die Werte werden alle **15 Minuten** abgefragt und zusätzlich direkt nach jeder Aktion.
 
@@ -182,7 +185,7 @@ Für Tages- und Monatswerte eignet sich der Helfer *Verbrauchszähler* (Utility 
 | „Keine Verbindung“ / Entities nicht verfügbar | Proxy-Reichweite prüfen. Belegen andere Geräte die 3 Verbindungsslots? Log unter *Einstellungen → System → Protokolle*, Filter `hansa_ble` |
 | „Passwort von der Armatur abgelehnt“ | Das Passwort wurde in der App geändert. *Konfigurieren* → richtiges Passwort eintragen |
 | Vorlaufen: „device did not confirm the command“ | Die Armatur hat nicht geöffnet. „App control“ muss auf „All allowed“ stehen (siehe Reparaturen) |
-| Vorlauf kürzer als eingestellt | Die Armatur begrenzt auf ihre „Manual flush time“; das lässt sich in der HANSA360-App erhöhen |
+| Vorlauf kürzer als eingestellt | Die Armatur begrenzt auf ihre „Manual flush time“; die lässt sich über *Max. Öffnungszeit* erhöhen |
 | Mehr Details | *Gerät → ⋮ → Debug-Protokollierung aktivieren*, Aktion wiederholen, Protokoll herunterladen |
 
 **Noch nicht an echter Hardware getestet:**
@@ -201,7 +204,7 @@ python -m pytest
 ```
 
 - `tests/test_protocol.py`: Krypto gegen Prüfwerte aus dem App-JavaScript, Zeitformat, Parsing.
-- `tests/test_integration.py`: echter Home-Assistant-Core mit simulierter Armatur (`tests/fake_fitting.py`). Abgedeckt sind Einrichtungsdialog, Entities, Vorlaufen (auch mit Login-Fallback und falschem Passwort), Reinigungssperre und Reinigungsdauer (auch verschlüsselt).
+- `tests/test_integration.py`: echter Home-Assistant-Core mit simulierter Armatur (`tests/fake_fitting.py`). Abgedeckt sind Einrichtungsdialog, Entities, Vorlaufen (auch mit Login-Fallback und falschem Passwort), Reinigungssperre, Zähler-Reset und das Schreiben der Geräteparameter (auch verschlüsselt).
 
 Die Tests laufen unter Linux und macOS. Home Assistant unterstützt Windows offiziell nicht.
 

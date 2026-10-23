@@ -63,6 +63,9 @@
       },
       "identify": {
         "name": "Identifizieren"
+      },
+      "reset_counters": {
+        "name": "Zähler zurücksetzen"
       }
     },
     "number": {
@@ -71,6 +74,12 @@
       },
       "cleaning_duration": {
         "name": "Reinigungsdauer"
+      },
+      "max_open_time": {
+        "name": "Max. Öffnungszeit"
+      },
+      "flow_rate": {
+        "name": "Durchflussrate"
       }
     },
     "switch": {
@@ -108,9 +117,6 @@
       },
       "since_last_use": {
         "name": "Zeit seit letzter Nutzung"
-      },
-      "flow_rate": {
-        "name": "Eingestellte Durchflussrate"
       },
       "since_counter_reset": {
         "name": "Zeit seit Zählerreset"

@@ -26,7 +26,8 @@ class FakeFitting:
         self.param_a[14:16] = (600).to_bytes(2, "little")  # maxCloseTime
         self.connected = False
         self.ignore_open = False  # e.g. appControl = "opening disabled"
-        self.bluetooth_mode = 0
+        self.param_c = bytearray(16)
+        self.param_c[2:4] = (50).to_bytes(2, "little")  # flowRate 5.0 l/min
 
     # what the device exposes in CHAR_PASSWORD: temp key encrypted with the fixed key
     def _enc_password(self) -> bytes:
@@ -50,10 +51,7 @@ class FakeFitting:
         if uuid == p.CHAR_PARAM_A:
             return bytes(self.param_a)
         if uuid == p.CHAR_PARAM_C:
-            c = bytearray(16)
-            c[2:4] = (50).to_bytes(2, "little")
-            c[9] = self.bluetooth_mode
-            return bytes(c)
+            return bytes(self.param_c)
         if uuid == p.CHAR_PARAM_A_MIN:
             m = bytearray(20); m[14:16] = (10).to_bytes(2, "little"); return bytes(m)
         if uuid == p.CHAR_PARAM_A_MAX:
@@ -81,12 +79,12 @@ class FakeFitting:
             if data[0] == p.CMD_OPEN and self.ignore_open:
                 return
             self.valve = {p.CMD_OPEN: 1, p.CMD_NORMAL: 0, p.CMD_CLOSE: 0}.get(data[0], self.valve)
-        elif uuid == p.CHAR_PARAM_A:
+        elif uuid in (p.CHAR_PARAM_A, p.CHAR_PARAM_C):
             if not self.logged_in:
                 raise BleakError("ATT error: not logged in")
             if self.encrypted:
                 data = AESCCM(self.temp_key, 8).decrypt(self.nonce[:13], data, None)
-            self.param_a[:] = data
+            (self.param_a if uuid == p.CHAR_PARAM_A else self.param_c)[:] = data
         else:
             raise BleakError(f"write to {uuid} not supported")
 

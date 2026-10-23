@@ -95,8 +95,11 @@ class HansaCoordinator(DataUpdateCoordinator[PollResult]):
             self.cleaning_lock_until = None
             await self._action(self.client.normal())
 
-    async def async_set_cleaning_duration(self, seconds: int) -> None:
-        await self._action(self.client.set_max_close_time(seconds))
+    async def async_set_param(self, char: str, offset: int, value: int) -> None:
+        await self._action(self.client.set_param(char, offset, value))
+
+    async def async_reset_counters(self) -> None:
+        await self._action(self.client.reset_counters())
 
     @property
     def cleaning_lock_active(self) -> bool:

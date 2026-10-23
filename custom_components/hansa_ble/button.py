@@ -1,4 +1,4 @@
-"""Buttons: flush (warm-up) and identify (wink)."""
+"""Buttons: flush (warm-up), identify (wink) and trip counter reset."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: HansaConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback
 ) -> None:
     c = entry.runtime_data
-    async_add_entities([FlushButton(c, "flush"), IdentifyButton(c, "identify")])
+    async_add_entities([FlushButton(c, "flush"), IdentifyButton(c, "identify"), ResetCountersButton(c, "reset_counters")])
 
 
 class FlushButton(HansaEntity, ButtonEntity):
@@ -31,3 +31,13 @@ class IdentifyButton(HansaEntity, ButtonEntity):
 
     async def async_press(self) -> None:
         await self.coordinator.async_identify()
+
+
+class ResetCountersButton(HansaEntity, ButtonEntity):
+    """COUNTER_RESET: zeroes the "since reset" counters; lifetime totals are untouched."""
+
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_icon = "mdi:counter"
+
+    async def async_press(self) -> None:
+        await self.coordinator.async_reset_counters()

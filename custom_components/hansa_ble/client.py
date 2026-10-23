@@ -33,7 +33,8 @@ class HansaAuthError(HansaError):
 class PollResult:
     state: p.DeviceState
     info: p.DeviceInfo
-    close_time_limits: tuple[int | None, int | None]
+    param_a_min: bytes  # device limits for productParamA fields, same offsets
+    param_a_max: bytes
 
 
 class HansaClient:
@@ -56,7 +57,7 @@ class HansaClient:
         self._now = now
         self._lock = asyncio.Lock()
         self._info: p.DeviceInfo | None = None
-        self._limits: tuple[int | None, int | None] | None = None
+        self._limits: tuple[bytes, bytes] | None = None
 
     # --- connection helpers -----------------------------------------------------------
     async def _connect(self) -> BleakClient:
@@ -147,11 +148,11 @@ class HansaClient:
                     await self._read(client, p.CHAR_PRODUCT_NAME, optional=True),
                 )
             if self._limits is None:
-                self._limits = p.max_close_time_limits(
+                self._limits = (
                     await self._read(client, p.CHAR_PARAM_A_MIN, optional=True),
                     await self._read(client, p.CHAR_PARAM_A_MAX, optional=True),
                 )
-            return PollResult(p.parse_state(*raw), self._info, self._limits)
+            return PollResult(p.parse_state(*raw), self._info, *self._limits)
 
         return await self._run(read_all)
 
@@ -160,6 +161,9 @@ class HansaClient:
 
     async def start_cleaning_lock(self) -> None:
         await self._run(lambda c: self._command(c, p.CMD_CLOSE))
+
+    async def reset_counters(self) -> None:
+        await self._run(lambda c: self._command(c, p.CMD_COUNTER_RESET))
 
     async def normal(self) -> None:
         await self._run(lambda c: self._command(c, p.CMD_NORMAL, expect_valve=False))
@@ -187,23 +191,23 @@ class HansaClient:
             finally:
                 await client.disconnect()
 
-    async def set_max_close_time(self, seconds: int) -> None:
-        """Change the cleaning-lock duration (productParamA offset 14). Always logs in;
-        uses the encrypted write when the device has encryption enabled."""
+    async def set_param(self, char: str, offset: int, value: int) -> None:
+        """Change one 2 byte field of productParamA/C, keeping the rest of the block.
+        Always logs in; uses the encrypted write when the device has encryption enabled."""
 
         async def write(client: BleakClient) -> None:
             await self._login(client)
-            current = await self._read(client, p.CHAR_PARAM_A)
-            new = p.set_u16(current, p.PARAM_A_MAX_CLOSE_TIME, seconds, min_len=20)
+            current = await self._read(client, char)
+            new = plain = p.set_u16(current, offset, value, min_len=20 if char == p.CHAR_PARAM_A else 0)
             enc_flag = await self._read(client, p.CHAR_ENCRYPTION, optional=True)
             if enc_flag and enc_flag[0] & 1:
                 enc = await self._read(client, p.CHAR_PASSWORD)
                 nonce = await self._read(client, p.CHAR_NONCE)
                 new = p.encrypt_write(new, enc, nonce)
-            await client.write_gatt_char(p.CHAR_PARAM_A, new, response=True)
-            check = await self._read(client, p.CHAR_PARAM_A)
-            if p.max_close_time(check) != seconds:
-                raise HansaError("device did not accept the new cleaning duration")
+            await client.write_gatt_char(char, new, response=True)
+            check = await self._read(client, char)
+            if check[offset : offset + 2] != plain[offset : offset + 2]:
+                raise HansaError("device did not accept the new value")
 
         await self._run(write)
 

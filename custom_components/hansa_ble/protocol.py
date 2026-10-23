@@ -39,6 +39,7 @@ CMD_WINK = 0x51
 CMD_OPEN = 0x62
 CMD_CLOSE = 0x73  # app button "Clean": cleaning lock for maxCloseTime seconds
 CMD_NORMAL = 0x84  # app button "Close": back to sensor operation
+CMD_COUNTER_RESET = 0xA6  # resets the trip counters only
 
 # Advertised names the app accepts (substring match, ValveScanner.deviceBrands).
 NAME_MARKERS = ("ORAS", "CYPRESS")
@@ -239,5 +240,5 @@ def max_close_time(param_a: bytes) -> int | None:
     return _u16(param_a, PARAM_A_MAX_CLOSE_TIME)
 
 
-def max_close_time_limits(param_a_min: bytes, param_a_max: bytes) -> tuple[int | None, int | None]:
-    return _u16(param_a_min, PARAM_A_MAX_CLOSE_TIME), _u16(param_a_max, PARAM_A_MAX_CLOSE_TIME)
+def u16_limits(param_min: bytes, param_max: bytes, off: int) -> tuple[int | None, int | None]:
+    return _u16(param_min, off), _u16(param_max, off)

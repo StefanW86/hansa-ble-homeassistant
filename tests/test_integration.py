@@ -14,7 +14,7 @@ from homeassistant.components.bluetooth import BluetoothServiceInfoBleak
 from homeassistant.const import ATTR_ENTITY_ID, CONF_ADDRESS, CONF_NAME, CONF_PASSWORD
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
-from homeassistant.exceptions import HomeAssistantError
+from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import device_registry as dr, issue_registry as ir
 
 from custom_components.hansa_ble import protocol as p
@@ -112,16 +112,46 @@ async def test_identify_and_cleaning_lock(hass: HomeAssistant, fitting) -> None:
 
 
 @pytest.mark.parametrize("encrypted", [False, True])
-async def test_set_cleaning_duration(hass: HomeAssistant, fitting, encrypted: bool) -> None:
+async def test_set_device_params(hass: HomeAssistant, fitting, encrypted: bool) -> None:
     fitting.encrypted = encrypted
+    fitting.param_c[9] = 3  # unrelated field in the same block
     await _setup(hass)
-    await hass.services.async_call(
-        "number", "set_value", {ATTR_ENTITY_ID: "number.waschtisch_links_cleaning_lock_duration", "value": 300}, blocking=True
-    )
+    assert hass.states.get("number.waschtisch_links_max_open_time").state == "60"
+    assert hass.states.get("number.waschtisch_links_flow_rate").state == "5.0"
+
+    async def set_value(entity: str, value: float) -> None:
+        await hass.services.async_call("number", "set_value", {ATTR_ENTITY_ID: entity, "value": value}, blocking=True)
+        await hass.async_block_till_done()
+
+    await set_value("number.waschtisch_links_cleaning_lock_duration", 300)
     assert p.max_close_time(bytes(fitting.param_a)) == 300
     assert p.max_open_time(bytes(fitting.param_a)) == 60  # rest of the block untouched
-    await hass.async_block_till_done()
     assert hass.states.get("number.waschtisch_links_cleaning_lock_duration").state == "300"
+
+    await set_value("number.waschtisch_links_max_open_time", 120)
+    assert p.max_open_time(bytes(fitting.param_a)) == 120
+    assert p.max_close_time(bytes(fitting.param_a)) == 300
+    assert hass.states.get("number.waschtisch_links_max_open_time").state == "120"
+
+    await set_value("number.waschtisch_links_flow_rate", 6.3)
+    assert fitting.param_c[2:4] == (63).to_bytes(2, "little")
+    assert fitting.param_c[9] == 3 and len(fitting.param_c) == 16
+    assert hass.states.get("number.waschtisch_links_flow_rate").state == "6.3"
+
+
+async def test_max_open_time_floor(hass: HomeAssistant, fitting) -> None:
+    await _setup(hass)
+    with pytest.raises(ServiceValidationError):
+        await hass.services.async_call(
+            "number", "set_value", {ATTR_ENTITY_ID: "number.waschtisch_links_max_open_time", "value": 10}, blocking=True
+        )
+    assert p.max_open_time(bytes(fitting.param_a)) == 60
+
+
+async def test_reset_counters(hass: HomeAssistant, fitting) -> None:
+    await _setup(hass)
+    await hass.services.async_call("button", "press", {ATTR_ENTITY_ID: "button.waschtisch_links_reset_counters"}, blocking=True)
+    assert fitting.commands == [p.CMD_COUNTER_RESET]
 
 
 async def test_config_flow_bluetooth(hass: HomeAssistant, fitting) -> None:
@@ -156,7 +186,7 @@ async def test_config_flow_ignores_other_devices(hass: HomeAssistant) -> None:
 
 
 async def test_repair_issue_when_bluetooth_not_always_on(hass: HomeAssistant, fitting) -> None:
-    fitting.bluetooth_mode = 1
+    fitting.param_c[9] = 1  # bluetoothMode
     await _setup(hass)
     assert ir.async_get(hass).async_get_issue(DOMAIN, f"config_{ADDRESS}") is not None
     assert hass.states.get("sensor.waschtisch_links_bluetooth_mode").state == "after_usage"
