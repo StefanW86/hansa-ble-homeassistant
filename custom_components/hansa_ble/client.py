@@ -64,13 +64,23 @@ class HansaClient:
         device = self._ble_device()
         if device is None:
             raise HansaError(f"{self.address} not in range of any connectable Bluetooth adapter/proxy")
-        try:
-            client = await establish_connection(
-                BleakClientWithServiceCache, device, self.name, max_attempts=3,
-                ble_device_callback=lambda: self._ble_device() or device,
-            )
-        except (BleakError, TimeoutError) as err:
-            raise HansaError(f"connect failed: {err}") from err
+        for _ in range(2):
+            try:
+                client = await establish_connection(
+                    BleakClientWithServiceCache, device, self.name, max_attempts=3,
+                    ble_device_callback=lambda: self._ble_device() or device,
+                )
+            except (BleakError, TimeoutError) as err:
+                raise HansaError(f"connect failed: {err}") from err
+            # An aborted connect can leave an incomplete GATT cache behind; then every read
+            # would silently come back empty. Drop the cache and discover the services again.
+            if client.services.get_characteristic(p.CHAR_COMMAND) is not None:
+                break
+            _LOGGER.warning("%s: GATT services incomplete, clearing cache and reconnecting", self.address)
+            await client.clear_cache()
+            await client.disconnect()
+        else:
+            raise HansaError("GATT services incomplete even after clearing the cache")
         # The app writes the clock right after service discovery; do the same.
         try:
             await client.write_gatt_char(p.CHAR_TIME, p.time_payload(self.type_code, self._now()), response=True)

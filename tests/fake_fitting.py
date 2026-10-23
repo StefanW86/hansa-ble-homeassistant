@@ -25,6 +25,8 @@ class FakeFitting:
         self.param_a[12:14] = (60).to_bytes(2, "little")  # maxOpenTime
         self.param_a[14:16] = (600).to_bytes(2, "little")  # maxCloseTime
         self.connected = False
+        self.stale_gatt_cache = False  # services look empty until clear_cache()
+        self.cache_clears = 0
         self.ignore_open = False  # e.g. appControl = "opening disabled"
         self.param_c = bytearray(16)
         self.param_c[2:4] = (50).to_bytes(2, "little")  # flowRate 5.0 l/min
@@ -98,10 +100,20 @@ class FakeBleakClient:
         self.f.logged_in = False  # login is per connection
 
     class _Services:
-        def get_characteristic(self, uuid):
-            return object()
+        def __init__(self, fitting: FakeFitting):
+            self.f = fitting
 
-    services = _Services()
+        def get_characteristic(self, uuid):
+            return None if self.f.stale_gatt_cache else object()
+
+    @property
+    def services(self):
+        return self._Services(self.f)
+
+    async def clear_cache(self) -> bool:
+        self.f.stale_gatt_cache = False
+        self.f.cache_clears += 1
+        return True
 
     @property
     def is_connected(self) -> bool:

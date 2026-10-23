@@ -148,6 +148,13 @@ async def test_max_open_time_floor(hass: HomeAssistant, fitting) -> None:
     assert p.max_open_time(bytes(fitting.param_a)) == 60
 
 
+async def test_stale_gatt_cache_is_cleared(hass: HomeAssistant, fitting) -> None:
+    fitting.stale_gatt_cache = True
+    await _setup(hass)
+    assert fitting.cache_clears == 1
+    assert hass.states.get("sensor.waschtisch_links_water_total").state == "123"
+
+
 async def test_reset_counters(hass: HomeAssistant, fitting) -> None:
     await _setup(hass)
     await hass.services.async_call("button", "press", {ATTR_ENTITY_ID: "button.waschtisch_links_reset_counters"}, blocking=True)
